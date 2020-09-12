@@ -30,7 +30,7 @@ z = torch.sparse.FloatTensor(i,v, torch.Size([2,3]))
 
 torch.sparse.mm # function for matrix - matrix multiplication, first matrix is sparse
 
-print(123)
+print("123")
 
 # equivalent
 torch.sparse.mm(z.t(), m.t()).t()

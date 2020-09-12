@@ -105,6 +105,7 @@ class WebGraph():
         else:
             v = torch.zeros(n)
             # FIXME: your code goes here
+            
         
         v_sum = torch.sum(v)
         assert(v_sum>0)
@@ -135,9 +136,46 @@ class WebGraph():
             x0 /= torch.norm(x0)
 
             # main loop
-            # FIXME: your code goes here
-            x = x0.squeeze()
+            a = torch.zeros(n)
 
+            # print(self.P)
+            for indx, row in enumerate(self.P):
+                # print(row)
+                if torch.sparse.sum(row) == 0: # is it ok to call ._nnz() ?
+                    a[indx] = 1
+
+            a = torch.unsqueeze(a, 1)
+            # a[4] = 1
+            v = torch.unsqueeze(v, 1)
+
+            i = 0
+            vector_norm = 10000
+            prev = None 
+            current = x0
+            while vector_norm > epsilon and i < max_iterations: 
+                prev = current
+                ax = alpha*prev
+                # print("alpha times x", ax)
+                # print("a", a.t())
+                scalar = torch.squeeze(torch.mm(ax.t(),a)) + (1-alpha)
+                # print("P", self.P)
+                # print("prev", prev)
+                left = torch.sparse.mm(self.P.t(), ax).t()
+                right = scalar*v.t()
+                # print("v: ", v)
+                current = (left + right).t()
+                # print("scalar", scalar)
+                # print("left", left)
+                # print("right", right)
+                # print("current", current.t())
+                # current = torch.sparse.addmm(right, left, right).t()
+                vector_norm = torch.norm(current - prev, p=2)
+                # print("accuracy", vector_norm)
+                i += 1
+
+            print("i:", i)
+            # print("vector norm of xk xk-1:", vector_norm)
+            x = current.squeeze()
             return x
 
 
