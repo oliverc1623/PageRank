@@ -3,8 +3,6 @@
 In this project, you will create a simple search engine for the website https://www.lawfareblog.com .
 This website provides legal analysis on US national security issues.
 
-**Due date:** Sunday, 13 September at midnight
-
 ## Task 1: the power method
 
 Implement the `WebGraph.power_method` function in `pagerank.py` for computing the pagerank vector.
