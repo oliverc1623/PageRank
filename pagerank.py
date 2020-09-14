@@ -104,6 +104,7 @@ class WebGraph():
 
         else:
             v = torch.zeros(n)
+            # make each entry in v 1 if the url satisfies the query
             for url in self.url_dict:
                 if url_satisfies_query(url, query):
                     v[self._url_to_index(url)] = 1
@@ -137,46 +138,29 @@ class WebGraph():
                 x0 = torch.unsqueeze(x0,1)
             x0 /= torch.norm(x0)
 
-            # main loop
+            # define our a vector, which has a 1 for every zero row in self.P
             a = torch.zeros(n)
-
-            # print(self.P)
             for indx, row in enumerate(self.P):
-                # print(row)
-                if torch.sparse.sum(row) == 0: # is it ok to call ._nnz() ?
+                if torch.sparse.sum(row) == 0:
                     a[indx] = 1
 
             a = torch.unsqueeze(a, 1)
-            # a[4] = 1
             v = torch.unsqueeze(v, 1)
-
+            
+            # initialize variable to keep track of in the power method
             i = 0
-            vector_norm = 10000
+            vector_norm = 1000
             prev = None 
             current = x0
+            # run the power method until the vectornorm <= epsilon or we surpass 1000 iterations
             while vector_norm > epsilon and i < max_iterations: 
                 prev = current
-                ax = alpha*prev
-                # print("alpha times x", ax)
-                # print("a", a.t())
-                scalar = torch.squeeze(torch.mm(ax.t(),a)) + (1-alpha)
-                # print("P", self.P)
-                # print("prev", prev)
-                left = torch.sparse.mm(self.P.t(), ax).t()
-                right = scalar*v.t()
-                # print("v: ", v)
-                current = (left + right).t()
-                # print("scalar", scalar)
-                # print("left", left)
-                # print("right", right)
-                # print("current", current.t())
-                # current = torch.sparse.addmm(right, left, right).t()
+                scalar = alpha * torch.squeeze(torch.mm(prev.t(),a)) + (1-alpha)
+                current = torch.sparse.addmm(mat = v, mat1 = self.P.t(), mat2 = prev, alpha = alpha, beta = scalar)
                 vector_norm = torch.norm(current - prev, p=2)
-                # print("accuracy", vector_norm)
                 i += 1
 
             print("i:", i)
-            # print("vector norm of xk xk-1:", vector_norm)
             x = current.squeeze()
             return x
 
