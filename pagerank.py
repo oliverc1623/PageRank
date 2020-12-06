@@ -183,12 +183,13 @@ def url_satisfies_query(url, query, vectors):
     satisfies = False
     terms = query.split()
     similar_terms = []
-    for term in terms:
-        similar = vectors.most_similar(term)[1:5]
-        similar = [i[0] for i in similar]
-        similar_terms.extend(similar)
-    # print(similar_terms)
-    similar_terms.extend(terms)
+
+    if len(terms) !=0 and terms[0][0] != '-':
+        for term in terms:
+            similar = vectors.most_similar(term)[1:5]
+            similar = [i[0] for i in similar]
+            similar_terms.extend(similar)
+        similar_terms.extend(terms)
     # print(similar_terms)
 
     num_terms=0
