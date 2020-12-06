@@ -187,6 +187,9 @@ def url_satisfies_query(url, query, vectors):
         similar = vectors.most_similar(term)[1:5]
         similar = [i[0] for i in similar]
         similar_terms.extend(similar)
+    # print(similar_terms)
+    similar_terms.extend(terms)
+    # print(similar_terms)
 
     num_terms=0
     for term in similar_terms:
